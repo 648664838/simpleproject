@@ -1,0 +1,36 @@
+COMMONPATH	= ../../mxw2Server/common
+CC		= gcc
+CXX		= g++
+CXXFLAGS 	= -g -o2 -DOTHERSERVER  -DENCODING_UTF8 -D_POSIX_MT_  -DUSE_LOG4CPP -DUSE_SHM -DLINUX -DUSE_LK_ASSERT  -DWEST_SERVER -DNDEBUG -D_DEBUG_
+INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I$(COMMONPATH)/include/
+LIBS     	= -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
+LINK     	= g++	
+####### Files
+
+OBJECTS = ./debug/simplebasedata.o ./debug/main.o \
+        ./debug/tinystr.o ./debug/tinyxml.o ./debug/tinyxmlerror.o ./debug/tinyxmlparser.o 
+
+TARGET = ./mysimpledb
+
+first: all
+./debug/tinystr.o :  $(COMMONPATH)/tiny/tinystr.cpp
+	$(CXX) -c  $(INCPATH) -o $@ $<
+	
+./debug/tinyxml.o : $(COMMONPATH)/tiny/tinyxml.cpp
+	$(CXX) -c  $(INCPATH) -o $@ $<
+
+./debug/tinyxmlerror.o : $(COMMONPATH)/tiny/tinyxmlerror.cpp
+	$(CXX) -c  $(INCPATH) -o $@ $<
+
+./debug/tinyxmlparser.o : $(COMMONPATH)/tiny/tinyxmlparser.cpp
+	$(CXX) -c $(INCPATH) -o $@ $<
+
+./debug/simplebasedata.o :  ./simplebasedata.cpp
+	$(CXX) -c  $(INCPATH) -o $@ $<
+
+./debug/main.o :  ./main.cpp
+	$(CXX) -c  $(INCPATH) -o $@ $<
+
+all : $(TARGET) 
+$(TARGET): $(OBJECTS) 
+	$(LINK) -o $(TARGET) $(OBJECTS) $(LIBS)
