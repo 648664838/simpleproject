@@ -8,7 +8,7 @@ namespace af
 {
 	enum
 	{
-		MAX_SOCKET_BUFF_SIZE = 64000,
+		MAX_SOCKET_BUFF_SIZE = 64 * 1024,
 	};
 	int SetNonBlock(int fd);
 	class CMySocket
@@ -47,42 +47,37 @@ namespace af
 	class CNetSocket : public CMySocket
 	{
 	public:
-		CNetSocket() :CMySocket(){}
-		explicit CNetSocket(char * Ip, bool bBlock = false) :CMySocket(Ip, bBlock){}
-		CNetSocket(int socket) :CMySocket(){ mSocket = socket;};
-		int Connect(char * Ip, int port);
-		int ReadData(char * pBuff, int nLen);
-		int WriteData(char * pBuff, int nLen);
-	};
-
-	typedef map<int, CNetSocket> CNetSocketList;
-
-	class CMyMessage
-	{
-	public:
-		enum 
-		{
-			MAX_SOCKET_BUFF_SIZE = 64000,
+		CNetSocket() :CMySocket()
+		{ 
+			Initial();
+		}
+		explicit CNetSocket(char * Ip, bool bBlock = false) :CMySocket(Ip, bBlock)
+		{ 
+			Initial();
+		}
+		CNetSocket(int socket) :CMySocket()
+		{ 
+			Initial();
+			mSocket = socket; 
 		};
-
-		CMyMessage();
-
+		void Initial()
+		{
+			mBuffLen = 0;
+			memset(mBuff, 0, sizeof(mBuff));
+		}
+		int Connect(char * Ip, int port);
+		int ReadData();
+		int WriteData(char * pBuff, int nLen);
 	public:
-	   virtual	int ParseMessageToBuff(char * pBuff, int& rLen);
-	   virtual	int ParseBuffToMessage(char * pBuff, int nLen);
-	public:
-		int mLen;
-		char mBuff[MAX_SOCKET_BUFF_SIZE];
+		int GetOneMessage(char * pBuff, int nLen);
+	private:
+		int mBuffLen;
+		char mBuff[MAX_SOCKET_BUFF_SIZE * 2 + 1];
 	};
 
 	typedef map<int, CNetSocket> CNetSocketList;
 
-	class CDispatcher
-	{
-	public:
-		void OnRecvCharMessage(char * pBuff, int nLen);
 
-	};
 
 	class CMyEpoll
 	{
@@ -93,7 +88,7 @@ namespace af
 		};
 
 	public:
-		CMyEpoll(char * Ip, CDispatcher * pDisPatcher, bool bBlock = false);
+		CMyEpoll(char * Ip, CMessageManger * pDisPatcher, bool bBlock = false);
 		~CMyEpoll();
 		int InitEpoll(int port, int protoType = SOCK_STREAM);
 		int RunEpoll(const int timeout);
@@ -109,6 +104,6 @@ namespace af
 		CNetSocketList mNetSocket;
 		int mEpollFd;
 		CListenSocket mListenSocket;
-		CDispatcher * mDispatcher;
+		CMessageManger * mMessageManger;
 	};
 }

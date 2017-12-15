@@ -65,6 +65,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="server_socket.cpp" />
     <ClCompile Include="simplebasedata.cpp" />
     <ClCompile Include="tinystr.cpp" />
     <ClCompile Include="tinyxml.cpp" />
@@ -72,6 +73,8 @@
     <ClCompile Include="tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cmessage.h" />
+    <ClInclude Include="server_socket.h" />
     <ClInclude Include="simplebasedata.h" />
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />
