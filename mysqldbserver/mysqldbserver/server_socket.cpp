@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <sys/epoll.h>
 #include "cmessage.h"
+#include "clienthandle.h"
 using namespace std;
 
 namespace af
@@ -37,28 +38,35 @@ namespace af
 		mPort = 0;
 	}
 
-	CMySocket::CMySocket(char * Ip, bool bBlock) : mBlock(bBlock), mSocket(0), mPort(0)
+	void CMySocket::SetIp(char * Ip)
 	{
+		if (Ip == NULL)
+		{
+			return;
+		}
 		strncpy(mIp, Ip, sizeof(mIp) - 1);
 	}
 
 	//create and bind socket
 	//if port is zero, random port;
 	//if ip is Null, INADDR_ANY
-	int CMySocket::InitSocket(int port, int protoType)
+	int CMySocket::InitSocket(char * Ip,int port, int protoType)
 	{
 		int ret = 0;
+
 		mSocket = socket(AF_INET, protoType, 0);
 		if (mSocket < 0)
 		{
 			return INVALID_SOCKET;
 		}
-		
+
+		SetIp(Ip);
+
 		sockaddr_in tServerAddr;
 		memset(&tServerAddr, 0, sizeof(tServerAddr));
 		tServerAddr.sin_family = AF_INET;
 		tServerAddr.sin_port = htons(port);
-		tServerAddr.sin_addr.s_addr = inet_addr(mIp == NULL ? INADDR_ANY : mIp);
+		tServerAddr.sin_addr.s_addr = inet_addr(mIp);
 
 		ret = bind(mSocket, (struct sockaddr *) &tServerAddr, sizeof(tServerAddr));
 
@@ -125,7 +133,7 @@ namespace af
 		{
 			return 0;
 		}
-
+		int nMsgLen = 0;
 		int nMsgSize = sizeof(CMessage);
 		if (mBuffLen >= nMsgSize)
 		{
@@ -133,9 +141,11 @@ namespace af
 			if (pMsg->mSize <= mBuffLen)
 			{
 				memmove(pBuff, mBuff, pMsg->mSize);
+				nMsgLen = pMsg->mSize;
 				mBuffLen -= pMsg->mSize;
 			}
 		}
+		return nMsgLen;
 	}
 
 	int CNetSocket::WriteData(char * pBuff, int nLen)
@@ -170,31 +180,14 @@ namespace af
 		return 0;
 	}
 
-	CMyMessage::CMyMessage()
-	{
-		mLen = 0;
-		memset(mBuff, 0, sizeof(mBuff));
-	}
-
-	int CMyMessage::ParseBuffToMessage(char * pBuff, int nLen)
-	{
-		mLen = nLen;
-		strncpy(mBuff, pBuff, sizeof(mBuff) - 1);
-	}
-	int CMyMessage::ParseMessageToBuff(char * pBuff, int& rLen)
-	{
-		memset(pBuff, 0, sizeof(pBuff));
-		strncpy(pBuff, mBuff, mLen);
-		rLen = mLen;
-	}
-
-	CMyEpoll::CMyEpoll(char * Ip, CMessageManger * pDisPatcher, bool bBlock = false) : mListenSocket(Ip, bBlock)
+	CMyEpoll::CMyEpoll()
 	{
 		mEpollFd = 0;
-		mMessageManger = pDisPatcher;
+		mClientHandle = NULL;
 	}
+	
 
-	int CMyEpoll::InitEpoll(int port, int protoType)
+	int CMyEpoll::InitEpoll()
 	{
 		mEpollFd = epoll_create(MAX_SOCKET_NUM);
 
@@ -206,7 +199,13 @@ namespace af
 		events_ = (struct epoll_event *)malloc(
 			sizeof(struct epoll_event) * MAX_SOCKET_NUM);
 
-		mListenSocket.InitSocket( port,  protoType);
+		return 0;
+	}
+
+	int CMyEpoll::InitEpoll(char * Ip, int port, bool bBlock, int protoType)
+	{
+		InitEpoll();
+		mListenSocket.InitSocket(Ip, port, protoType);
 		mListenSocket.Listen();
 		return 0;
 	}
@@ -219,13 +218,18 @@ namespace af
 		{
 			for (int i = 0; i < retval; ++i)
 			{
-				if (events_[i].data.fd == mListenSocket.GetSocket())
+				if (mListenSocket.GetSocket() > 0 && events_[i].data.fd == mListenSocket.GetSocket())
 				{ 
 					int nFd = 0;
 					while ((nFd = mListenSocket.Accpet())> 0)
 					{
 						SetNonBlock(nFd);
 						AddEvent(nFd, EPOLLIN | EPOLLERR | EPOLLHUP);
+
+						if (mClientHandle)
+						{
+							mClientHandle->OnConnectSocket(nFd);
+						}
 					}
 				}
 				else if (events_[i].events & EPOLLIN)
@@ -238,21 +242,21 @@ namespace af
 					}
 					char pBuff[MAX_SOCKET_BUFF_SIZE];
 					int nLen = MAX_SOCKET_BUFF_SIZE;
-					int nBuffNum = pNetSocket->ReadData();
+					int tBuffNum = pNetSocket->ReadData();
 					while (true)
 					{
-						nBuffNum = pNetSocket->GetOneMessage(pBuff, nLen);
+						int nBuffNum = pNetSocket->GetOneMessage(pBuff, nLen);
 						if (nBuffNum <= 0)
 						{
 							break;
 						}
 
-						if (mMessageManger)
+						if (mClientHandle)
 						{
-							mMessageManger->OnRecvCharMessage(pNetSocket, pBuff, nBuffNum);
+							mClientHandle->OnRecvMessage(pNetSocket->GetSocket(), (CMessage *)pBuff);
 						}
 					}
-					if (nBuffNum <= 0)
+					if (tBuffNum <= 0)
 					{
 						DelEvent(events_[i].data.fd);
 						continue;
@@ -282,7 +286,7 @@ namespace af
 		epollevent.events = event;
 		return epoll_ctl(mEpollFd, EPOLL_CTL_ADD, fd, &epollevent);
 	}
-	int CMyEpoll::DelEvent(const int fd)
+	int CMyEpoll::DelEvent(const int fd, bool bRecv)
 	{
 		CNetSocketList::iterator it = mNetSocket.find(fd);
 		if (it != mNetSocket.end())
@@ -291,6 +295,10 @@ namespace af
 			mNetSocket.erase(fd);
 		}
 
+		if (bRecv && mClientHandle)
+		{
+			mClientHandle->OnDisConnectSokcet(fd);
+		}
 		struct epoll_event epollevent;
 		epollevent.data.fd = fd;
 		return epoll_ctl(mEpollFd, EPOLL_CTL_DEL, fd, &epollevent);

@@ -4,8 +4,13 @@
 
 using namespace std;
 
+
+
 namespace af
 {
+
+	class CClientHandle;
+
 	enum
 	{
 		MAX_SOCKET_BUFF_SIZE = 64 * 1024,
@@ -20,12 +25,12 @@ namespace af
 		};
 	public:
 		CMySocket();
-		explicit CMySocket(char * Ip, bool bBlock = false);
 		virtual ~CMySocket();
-		virtual int InitSocket(int port, int protoType = SOCK_STREAM);
+		virtual int InitSocket(char * Ip,int port, int protoType = SOCK_STREAM);
 		virtual void Close();
 
 	public:
+		void SetIp(char * Ip);
 		int GetSocket(){ return mSocket; }
 		void SetSocket(int socket){ mSocket = socket; }
 	protected:
@@ -38,7 +43,6 @@ namespace af
 	{
 	public:
 		CListenSocket() :CMySocket(){}
-		explicit CListenSocket(char * Ip, bool bBlock = false) :CMySocket(Ip,bBlock){}
 
 		int Listen();
 		int Accpet();
@@ -48,10 +52,6 @@ namespace af
 	{
 	public:
 		CNetSocket() :CMySocket()
-		{ 
-			Initial();
-		}
-		explicit CNetSocket(char * Ip, bool bBlock = false) :CMySocket(Ip, bBlock)
 		{ 
 			Initial();
 		}
@@ -77,8 +77,6 @@ namespace af
 
 	typedef map<int, CNetSocket> CNetSocketList;
 
-
-
 	class CMyEpoll
 	{
 	public:
@@ -88,22 +86,24 @@ namespace af
 		};
 
 	public:
-		CMyEpoll(char * Ip, CMessageManger * pDisPatcher, bool bBlock = false);
+		CMyEpoll();
 		~CMyEpoll();
-		int InitEpoll(int port, int protoType = SOCK_STREAM);
+		int InitEpoll();
+		int InitEpoll(char * Ip, int port, bool bBlock = false, int protoType = SOCK_STREAM);
+		void SetMessageManger(CClientHandle * pClientHandle){ mClientHandle = pClientHandle; }
+		CNetSocket * GetNetSocket(const int fd);
+		int DelEvent(const int fd , bool bRecv = true);
 		int RunEpoll(const int timeout);
+	protected:
+
 		int AddEvent(const int fd, const int event);
-		int DelEvent(const int fd);
 		int ModEvent(const int fd, const int oldevent, const int newevent);
 
-
-	public:
-		CNetSocket * GetNetSocket(const int fd);
-	public:
+	private:
 		struct epoll_event *events_;
 		CNetSocketList mNetSocket;
 		int mEpollFd;
 		CListenSocket mListenSocket;
-		CMessageManger * mMessageManger;
+		CClientHandle * mClientHandle;
 	};
 }

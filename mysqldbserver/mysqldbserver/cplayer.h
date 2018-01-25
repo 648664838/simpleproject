@@ -1,15 +1,16 @@
 #pragma once
 
-class CPlayerClient
-{
-public:
-	int mSocket;
-	int mPlayerEntityID;
-};
 
 class CPlayerData
 {
 public:
+	CPlayerData()
+	{
+		mSocket = 0;
+		mCharID = 0;
+	}
+
+public:
+	int mSocket;
 	int mCharID;
-	int mEntityID;
 };
