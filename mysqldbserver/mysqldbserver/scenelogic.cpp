@@ -8,6 +8,7 @@ namespace af
 	void CSceneLogic::Init()
 	{
 		mClientHandle.Init("127.0.0.1",24100);
+		mDataBase.Initialize("./config/mysqlinfo.xml");
 	}
 	void CSceneLogic::Final()
 	{
@@ -82,6 +83,21 @@ namespace af
 		}
 
 		//TODO£∫–£—È’À∫≈
+
+		//bool bQuery = mDataBase.Query("select * from ccc");
+		//CQueryResult & rQueryResult = mDataBase.GetQueryResult();
+		//while (bQuery && rQueryResult.NextRow())
+		//{
+		//	CField* pField = rQueryResult.Fetch();
+		//	if (pField != NULL)
+		//	{
+		//		for (int i = 0; i < rQueryResult.GetFieldCount(); ++i)
+		//		{
+		//			cout << pField[i].GetType() << "\t";
+		//			cout << pField[i].GetString() << endl;
+		//		}
+		//	}
+		//}
 	}
 
 	CPlayerData * CSceneLogic::GetScenePlayerData(int nSocket)

@@ -16,7 +16,7 @@ CDataBase::~CDataBase()
 	mysql_library_end();
 }
 
-bool CDataBase::Initialize(char * pPath)
+bool CDataBase::Initialize(const char * pPath)
 {
 	if (pPath == NULL)
 	{

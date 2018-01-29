@@ -41,7 +41,7 @@ namespace af
 		tMsg.mSrcAddrType = emMessageAddrType_PlayerClient;
 		CSceneLogic::GetSingletonPtr()->ProcessMessage(nSocket, &tMsg);
 	}
-
+	//Ö÷¶¯¶Ï¿ª
 	void CClientHandle::DisConnectSocket(int nSocket)
 	{
 		mMyEpoll.DelEvent(nSocket, false);

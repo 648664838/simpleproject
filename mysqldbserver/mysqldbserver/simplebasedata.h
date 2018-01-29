@@ -86,7 +86,7 @@ public:
 	CDataBase();
 	~CDataBase();
 
-	bool Initialize(char * pPath);
+	bool Initialize(const char * pPath);
 	bool Query(const char * pSql);
 	void escape_string(std::string& str);
 

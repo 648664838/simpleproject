@@ -3,6 +3,7 @@
 #include "clienthandle.h"
 #include "cplayer.h"
 #include "CSingleton.h"
+#include "simplebasedata.h"
 #include <map>
 
 using namespace std;
@@ -67,6 +68,9 @@ namespace af
 
 		VetifyMap	  mVerifyData;  //在验证的列表
 		PlayerDataMap mPlayerData;  //已登陆的列表
+
+
+		CDataBase mDataBase;   //数据库
 	};
 }
 
