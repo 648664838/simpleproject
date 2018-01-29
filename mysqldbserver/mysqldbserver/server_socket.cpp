@@ -1,12 +1,5 @@
 ﻿#include "server_socket.h"
-#include <string>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/epoll.h>
+#include <stdlib.h>
 #include "cmessage.h"
 #include "clienthandle.h"
 using namespace std;
@@ -38,7 +31,7 @@ namespace af
 		mPort = 0;
 	}
 
-	void CMySocket::SetIp(char * Ip)
+	void CMySocket::SetIp(const char * Ip)
 	{
 		if (Ip == NULL)
 		{
@@ -50,14 +43,14 @@ namespace af
 	//create and bind socket
 	//if port is zero, random port;
 	//if ip is Null, INADDR_ANY
-	int CMySocket::InitSocket(char * Ip,int port, int protoType)
+	int CMySocket::InitSocket(const char * Ip, int port, int protoType)
 	{
 		int ret = 0;
 
 		mSocket = socket(AF_INET, protoType, 0);
 		if (mSocket < 0)
 		{
-			return INVALID_SOCKET;
+			return -1;
 		}
 
 		SetIp(Ip);
@@ -70,7 +63,7 @@ namespace af
 
 		ret = bind(mSocket, (struct sockaddr *) &tServerAddr, sizeof(tServerAddr));
 
-		return ret
+		return ret;
 	}
 
 	void CMySocket::Close()
@@ -102,24 +95,17 @@ namespace af
 	{
 		sockaddr_in tClentAddr;
 		int nAddrLen = sizeof(sockaddr_in);
-		return accept(mSocket, (sockaddr *)&tClentAddr, (socklen_t*)&nAddrLen));
+		return accept(mSocket, (sockaddr *)&tClentAddr, (socklen_t*)&nAddrLen);
 	}
 
-	int CNetSocket::ReadData(char * pBuff, int nLen)
+	int CNetSocket::ReadData()
 	{
-		if (pBuff == NULL || nLen <= 0 )
-		{
-			return 0;  
-		}
-
 		if (mSocket <= 0)
 		{
 			return -1;
 		}
 
-		memset(pBuff, 0, sizeof(pBuff));
-
-		return read(mSocket, mBuff + mBuffLen, nLen);
+		return read(mSocket, mBuff + mBuffLen, MAX_SOCKET_BUFF_SIZE * 2 + 1 - mBuffLen);
 	}
 
 	int CNetSocket::GetOneMessage(char * pBuff, int nLen)
@@ -163,7 +149,7 @@ namespace af
 		return write(mSocket, pBuff, nLen);
 	}
 
-	int CNetSocket::Connect(char * Ip, int port)
+	int CNetSocket::Connect(const char * Ip, int port)
 	{	
 		sockaddr_in tServerAddr;
 		tServerAddr.sin_family = AF_INET;
@@ -202,7 +188,17 @@ namespace af
 		return 0;
 	}
 
-	int CMyEpoll::InitEpoll(char * Ip, int port, bool bBlock, int protoType)
+	CMyEpoll::~CMyEpoll()
+	{
+		if (events_)
+		{
+			delete events_;
+			events_ = NULL;
+		}
+
+	}
+
+	int CMyEpoll::InitEpoll(const char * Ip, int port, bool bBlock, int protoType)
 	{
 		InitEpoll();
 		mListenSocket.InitSocket(Ip, port, protoType);
@@ -279,7 +275,7 @@ namespace af
 
 	int CMyEpoll::AddEvent(const int fd, const int event)
 	{
-		mNetSocket.insert(make_pair(fd,CNetSocket(fd))
+		mNetSocket.insert(make_pair(fd, CNetSocket(fd)));
 
 		struct epoll_event epollevent;
 		epollevent.data.fd = fd;

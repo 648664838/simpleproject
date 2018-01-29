@@ -64,7 +64,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="clienthandle.cpp" />
+    <ClCompile Include="cmessage.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="scenelogic.cpp" />
     <ClCompile Include="server_socket.cpp" />
     <ClCompile Include="simplebasedata.cpp" />
     <ClCompile Include="tinystr.cpp" />
@@ -73,7 +76,13 @@
     <ClCompile Include="tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="clienthandle.h" />
     <ClInclude Include="cmessage.h" />
+    <ClInclude Include="cplayer.h" />
+    <ClInclude Include="cplayertype.h" />
+    <ClInclude Include="cscenetype.h" />
+    <ClInclude Include="CSingleton.h" />
+    <ClInclude Include="scenelogic.h" />
     <ClInclude Include="server_socket.h" />
     <ClInclude Include="simplebasedata.h" />
     <ClInclude Include="tinystr.h" />

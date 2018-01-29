@@ -1,6 +1,15 @@
 #pragma once
-
+#include <cstring>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/epoll.h>
+#include <unistd.h>
 #include <map>
+
 
 using namespace std;
 
@@ -25,12 +34,12 @@ namespace af
 		};
 	public:
 		CMySocket();
-		virtual ~CMySocket();
-		virtual int InitSocket(char * Ip,int port, int protoType = SOCK_STREAM);
+		virtual ~CMySocket(){}
+		virtual int InitSocket(const char * Ip, int port, int protoType = 1);
 		virtual void Close();
 
 	public:
-		void SetIp(char * Ip);
+		void SetIp(const char * Ip);
 		int GetSocket(){ return mSocket; }
 		void SetSocket(int socket){ mSocket = socket; }
 	protected:
@@ -65,7 +74,7 @@ namespace af
 			mBuffLen = 0;
 			memset(mBuff, 0, sizeof(mBuff));
 		}
-		int Connect(char * Ip, int port);
+		int Connect(const char * Ip, int port);
 		int ReadData();
 		int WriteData(char * pBuff, int nLen);
 	public:
@@ -89,7 +98,7 @@ namespace af
 		CMyEpoll();
 		~CMyEpoll();
 		int InitEpoll();
-		int InitEpoll(char * Ip, int port, bool bBlock = false, int protoType = SOCK_STREAM);
+		int InitEpoll(const char * Ip, int port, bool bBlock = false, int protoType = 1);
 		void SetMessageManger(CClientHandle * pClientHandle){ mClientHandle = pClientHandle; }
 		CNetSocket * GetNetSocket(const int fd);
 		int DelEvent(const int fd , bool bRecv = true);

@@ -1,6 +1,7 @@
 #include "scenelogic.h"
 #include "cmessage.h"
 #include "cplayer.h"
+#include <time.h>
 
 namespace af
 {

@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 #include "server_socket.h"
 #include "cmessage.h"
 #include <set>
@@ -13,7 +13,7 @@ namespace af
 
 	public:
 		void Init();
-		void Init(char * Ip,int nPort);
+		void Init(const char * Ip,int nPort);
 		void Recv();
 		virtual void OnRecvMessage(int nSocket, CMessage * pMsg);
 		virtual void OnConnectSocket(int nSocket);

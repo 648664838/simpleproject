@@ -1,6 +1,7 @@
 #pragma once
 
 #include "clienthandle.h"
+#include "cplayer.h"
 #include "CSingleton.h"
 #include <map>
 
@@ -9,20 +10,24 @@ using namespace std;
 namespace af
 {
 	class CMessage;
-	class CPlayerData;
 
 	class CSceneLogic : public CMySingleton<CSceneLogic>
 	{
+		friend class CMySingleton < CSceneLogic > ;
 	public:
 		class CSocketInfo
 		{
 		public:
 			int mSocketID;
 			int mLastTime;
+
+			bool operator < (const CSocketInfo& other)  const
+			{
+				return mSocketID < other.mSocketID;
+			}
 		};
 
 	public:
-		friend CMySingleton < CSceneLogic >;
 
 		typedef map<int, CPlayerData> PlayerDataMap;
 		typedef PlayerDataMap::iterator PlayerDataIter;
@@ -43,8 +48,8 @@ namespace af
 			Final();
 		}
 	public:
-		void Init(){}
-		void Final(){}
+		void Init();
+		void Final();
 
 		void Run();
 

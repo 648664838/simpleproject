@@ -1,54 +1,102 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="项目">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="项目\message">
+      <UniqueIdentifier>{e95c39d6-cc32-405b-9057-a43acd595fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\message\clienthandle">
+      <UniqueIdentifier>{10240c7e-0e98-47c4-b475-bcea2756dd04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\tinyxml">
+      <UniqueIdentifier>{a50c28d0-27b3-48cf-b4ff-bba7d547be77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\network">
+      <UniqueIdentifier>{26579b14-828e-4619-aa94-3d3e251c40f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\database">
+      <UniqueIdentifier>{e9e2f34c-4081-4c7c-9375-cea8bc0445fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\scene">
+      <UniqueIdentifier>{26c831ab-25fb-44eb-aff3-ae973c591a70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="项目\scene\player">
+      <UniqueIdentifier>{5f24ed21-c495-4255-918c-825eaacb843d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="项目\tools">
+      <UniqueIdentifier>{bad6d8e3-5a52-458f-9b6d-0d7348bdd022}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="simplebasedata.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="tinystr.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="tinyxml.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="tinyxmlerror.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="tinyxmlparser.cpp">
-      <Filter>源文件</Filter>
+      <Filter>项目\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxmlerror.cpp">
+      <Filter>项目\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml.cpp">
+      <Filter>项目\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="tinystr.cpp">
+      <Filter>项目\tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="server_socket.cpp">
-      <Filter>源文件</Filter>
+      <Filter>项目\network</Filter>
+    </ClCompile>
+    <ClCompile Include="simplebasedata.cpp">
+      <Filter>项目\database</Filter>
+    </ClCompile>
+    <ClCompile Include="cmessage.cpp">
+      <Filter>项目\message</Filter>
+    </ClCompile>
+    <ClCompile Include="clienthandle.cpp">
+      <Filter>项目\message\clienthandle</Filter>
+    </ClCompile>
+    <ClCompile Include="scenelogic.cpp">
+      <Filter>项目\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="simplebasedata.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="tinystr.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="cmessage.h">
+      <Filter>项目\message</Filter>
     </ClInclude>
     <ClInclude Include="tinyxml.h">
-      <Filter>头文件</Filter>
+      <Filter>项目\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="tinystr.h">
+      <Filter>项目\tinyxml</Filter>
     </ClInclude>
     <ClInclude Include="server_socket.h">
-      <Filter>源文件</Filter>
+      <Filter>项目\network</Filter>
+    </ClInclude>
+    <ClInclude Include="simplebasedata.h">
+      <Filter>项目\database</Filter>
+    </ClInclude>
+    <ClInclude Include="cplayer.h">
+      <Filter>项目\scene\player</Filter>
+    </ClInclude>
+    <ClInclude Include="clienthandle.h">
+      <Filter>项目\message\clienthandle</Filter>
+    </ClInclude>
+    <ClInclude Include="CSingleton.h">
+      <Filter>项目\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="scenelogic.h">
+      <Filter>项目\scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

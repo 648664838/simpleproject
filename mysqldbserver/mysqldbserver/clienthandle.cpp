@@ -8,7 +8,7 @@ namespace af
 	{
 
 	}
-	void CClientHandle::Init(char * Ip, int nPort)
+	void CClientHandle::Init(const char * Ip, int nPort)
 	{
 		mMyEpoll.InitEpoll(Ip,nPort);
 		mMyEpoll.SetMessageManger(this);
