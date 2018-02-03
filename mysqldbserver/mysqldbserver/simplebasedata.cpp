@@ -1,6 +1,8 @@
 #include "simplebasedata.h"
 #include "tinyxml.h"
 #include <iostream>
+#include <stdarg.h>
+#include "cscenetype.h"
 using namespace std;
 
 CDataBase::CDataBase()
@@ -81,7 +83,7 @@ bool CDataBase::Initialize(const char * pPath)
 	return true;
 }
 
-bool CDataBase::Query(const char * pSql)
+bool CDataBase::ExecuteSql(const char* pSql, ...)
 {
 	if (pSql == NULL)
 	{
@@ -95,7 +97,15 @@ bool CDataBase::Query(const char * pSql)
 		return false;
 	}
 
-	string strSql(pSql);
+	va_list tArgs;
+
+	char tSqlCommand[MAX_SQL_BUFF_LENGTH] = { 0 };
+
+	va_start(tArgs, pSql);
+	::vsprintf(tSqlCommand, pSql, tArgs);
+	va_end(tArgs);
+
+	string strSql(tSqlCommand);
 	escape_string(strSql);
 
 	int nFlag = mysql_real_query(mMySql, strSql.c_str(), (unsigned int)strSql.length());
@@ -268,6 +278,16 @@ enum CField::DataTypes CQueryResult::ConvertNativeType(enum_field_types mysqlTyp
 	default:
 		return CField::DB_TYPE_UNKNOWN;
 	}
+}
+
+CField * CQueryResult::GetCurRowFieldByIndex(int nIndex)
+{
+	if (nIndex < 0 || nIndex >= mFieldCount)
+	{
+		return NULL;
+	}
+
+	return &mCurRow[nIndex];
 }
 
 CField::CField() :mValue(NULL), mType(DB_TYPE_UNKNOWN)

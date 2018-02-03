@@ -72,6 +72,8 @@ public:
 	enum CField::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
 	void EndQuery();
 	int GetFieldCount(){ return mFieldCount; }
+	int GetRowCount(){ return mRowCount; }
+	CField * GetCurRowFieldByIndex(int nIndex);
 private:
 	CField *mCurRow;
 	uint32 mFieldCount;
@@ -87,8 +89,10 @@ public:
 	~CDataBase();
 
 	bool Initialize(const char * pPath);
-	bool Query(const char * pSql);
+
 	void escape_string(std::string& str);
+	 // Ö´ÐÐSQL
+	bool ExecuteSql(const char * pSql, ...);
 
 	CQueryResult& GetQueryResult(){ return mQueryResult; }
 protected:

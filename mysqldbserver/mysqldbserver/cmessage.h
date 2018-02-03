@@ -12,7 +12,7 @@ namespace af
 		emMessageID_DisConnect = 2,
 		emMessageID_LoginSceneRequest  = 3, //µÇÂ½ÇëÇó
 		emMessageID_LoginSceneResponse = 4, //µÇÂ½»ØÓ¦
-
+		emMessageID_KickPlayerNotify   = 5,	//ÌßµôÍæ¼Ò
 	};
 
 	enum TmMessageAddrType
@@ -57,6 +57,18 @@ namespace af
 			mID = emMessageID_DisConnect;
 			mSize = sizeof(CDisConnectMessage);
 		}
+	};
+
+	class CKickPlayerNotifyMessage : public CMessage
+	{
+	public:
+		CKickPlayerNotifyMessage()
+		{
+			mID = emMessageID_KickPlayerNotify;
+			mSize = sizeof(CKickPlayerNotifyMessage);
+		}
+	public:
+		int mReason;
 	};
 
 	class CMessageLoginSceneRequest : public CMessage

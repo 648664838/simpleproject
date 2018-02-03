@@ -82,6 +82,7 @@
     <ClInclude Include="cplayertype.h" />
     <ClInclude Include="cscenetype.h" />
     <ClInclude Include="CSingleton.h" />
+    <ClInclude Include="error.h" />
     <ClInclude Include="scenelogic.h" />
     <ClInclude Include="server_socket.h" />
     <ClInclude Include="simplebasedata.h" />

@@ -36,8 +36,6 @@ namespace af
 		typedef	map<int, CSocketInfo>	ConnectSocketMap;
 		typedef	ConnectSocketMap::iterator	ConnectSocketIter;
 
-		typedef	map<int, CSocketInfo>	VetifyMap;
-		typedef	VetifyMap::iterator	VetifyMapIter;
 	private:
 		CSceneLogic()
 		{
@@ -60,15 +58,15 @@ namespace af
 		CSocketInfo * GetSceneConnectInfo(int nSocket);
 		CSocketInfo * GetSceneVerifyData(int nSocket);
 		void OnMessageLoginSceneRequest(int nSocket,CMessage * pMessage);
+		void SendLoginSceneResponse(int nSocket, int nResult);
+		int  LoadPlayerData(int nSocket, int nRoleId, CPlayerData & rPkayerData);
 	protected:
 		void ProcessPlayerClientMessage(int nSocket, CMessage * pMessage);
 	private:
 		CClientHandle mClientHandle;
-		map<int,CSocketInfo>	mConnectSocket;
 
-		VetifyMap	  mVerifyData;  //在验证的列表
-		PlayerDataMap mPlayerData;  //已登陆的列表
-
+		map<int,CSocketInfo>	mConnectSocket; //已连接列表
+		PlayerDataMap mPlayerData;  //已登陆列表
 
 		CDataBase mDataBase;   //数据库
 	};

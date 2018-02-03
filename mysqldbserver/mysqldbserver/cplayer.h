@@ -8,6 +8,7 @@ public:
 	{
 		mSocket = 0;
 		mCharID = 0;
+		mMoney  = 0;
 	}
 
 	bool operator < (const CPlayerData& other)  const
@@ -18,4 +19,5 @@ public:
 public:
 	int mSocket;
 	int mCharID;
+	int mMoney;
 };

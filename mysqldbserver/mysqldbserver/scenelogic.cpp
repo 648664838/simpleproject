@@ -3,6 +3,7 @@
 #include "cplayer.h"
 #include <time.h>
 #include "cscenetype.h"
+#include "error.h"
 
 namespace af
 {
@@ -78,33 +79,91 @@ namespace af
 		CSocketInfo * tpInfo = GetSceneConnectInfo(nSocket);
 		if (tpInfo == NULL)
 		{
+			SendLoginSceneResponse(nSocket, ERROR_LOGIN_SCENE_NOT_CONNECT);
+			return;
+		}
+		CMessageLoginSceneRequest * pRequest = (CMessageLoginSceneRequest *)pMessage;
+		//校验账号
+		bool bExecute = mDataBase.ExecuteSql("select role_id from tb_account from where user_name ='%s' and password ='%s'", pRequest->mAccount, pRequest->mPassWord);
+		if (!bExecute || mDataBase.GetQueryResult().GetRowCount() <= 0)
+		{
+			SendLoginSceneResponse(nSocket, ERROR_LOGIN_SCENE_ACOUNT_INVAILD);
 			return;
 		}
 
-		CMessageLoginSceneResponse tResponse;
-		tResponse.mResult = SUCCESS;
-		mClientHandle.SendClientMessage(nSocket, &tResponse);
+		int nRoleID = 0;
+		int nResult = mDataBase.GetQueryResult().NextRow();
+		if (nResult)
+		{
+			CField * pRoleIdField = mDataBase.GetQueryResult().GetCurRowFieldByIndex(0);
+			if (pRoleIdField != NULL)
+			{
+				nRoleID = pRoleIdField->GetInt32();
+			}
+		}
 
+		if (nRoleID <= 0)
+		{
+			SendLoginSceneResponse(nSocket, ERROR_LOGIN_SCENE_ROLEID_ZERO);
+			return;
+		}
+		CPlayerData tPlayerData;
+		nResult = LoadPlayerData(nSocket, nRoleID, tPlayerData);
+		if (nResult != SUCCESS)
+		{
+			SendLoginSceneResponse(nSocket, nResult);
+			return;
+		}
+	
 		mConnectSocket.erase(tpInfo->mSocketID);
+		mPlayerData.insert(make_pair(nSocket, tPlayerData));
 
-		
+		SendLoginSceneResponse(nSocket, nResult);
+	}
 
-		//TODO：校验账号
+	int CSceneLogic::LoadPlayerData(int nSocket, int nRoleId, CPlayerData & rPlayerData)
+	{
+		if (nRoleId <= 0)
+		{
+			return ERROR_LOGIN_SCENE_ROLEID_ZERO;
+		}
+		//加载相关数据
+		bool bExecute = mDataBase.ExecuteSql("select role_money from tb_role from where role_id ='%d'", nRoleId);
+		if (!bExecute || mDataBase.GetQueryResult().GetRowCount() <= 0)
+		{
+			return ERROR_LOGIN_SCENE_ROLEDATA_NULL;
+		}
 
-		//bool bQuery = mDataBase.Query("select * from ccc");
-		//CQueryResult & rQueryResult = mDataBase.GetQueryResult();
-		//while (bQuery && rQueryResult.NextRow())
-		//{
-		//	CField* pField = rQueryResult.Fetch();
-		//	if (pField != NULL)
-		//	{
-		//		for (int i = 0; i < rQueryResult.GetFieldCount(); ++i)
-		//		{
-		//			cout << pField[i].GetType() << "\t";
-		//			cout << pField[i].GetString() << endl;
-		//		}
-		//	}
-		//}
+		bool bResult = mDataBase.GetQueryResult().NextRow();
+		if (!bResult)
+		{
+			return ERROR_LOGIN_SCENE_ROLEDATA_RESULT;
+		}
+
+		if(mDataBase.GetQueryResult().GetFieldCount() != 1  //检查列数
+			||mDataBase.GetQueryResult().GetRowCount() <= 0
+		  )
+		{
+			return ERROR_LOGIN_SCENE_ROLEDATA_INVALLD;
+		}
+
+		CField * pRoleIdField = mDataBase.GetQueryResult().Fetch();
+		if (pRoleIdField == NULL)
+		{
+			return ERROR_LOGIN_SCENE_ROLEDATA_FECTH;
+		}
+
+		rPlayerData.mSocket = nSocket;
+		rPlayerData.mCharID = nRoleId;
+		rPlayerData.mMoney = pRoleIdField[0].GetInt32();
+		return SUCCESS;
+	}
+
+	void CSceneLogic::SendLoginSceneResponse(int nSocket, int nResult)
+	{
+		CMessageLoginSceneResponse tResponse;
+		tResponse.mResult = nResult;
+		mClientHandle.SendClientMessage(nSocket, &tResponse);
 	}
 
 	CPlayerData * CSceneLogic::GetScenePlayerData(int nSocket)
@@ -122,16 +181,6 @@ namespace af
 	{
 		ConnectSocketIter it = mConnectSocket.find(nSocket);
 		if (it == mConnectSocket.end())
-		{
-			return NULL;
-		}
-
-		return &it->second;
-	}
-	CSceneLogic::CSocketInfo * CSceneLogic::GetSceneVerifyData(int nSocket)
-	{
-		ConnectSocketIter it = mVerifyData.find(nSocket);
-		if (it == mVerifyData.end())
 		{
 			return NULL;
 		}
