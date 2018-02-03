@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include "scenelogic.h"
-#include "simplebasedata.h"
 
 #include <signal.h>  
 #include <sys/file.h>
@@ -93,7 +92,6 @@ int main(int argc, const char * argv[])
 		init_daemon();
 	}
 
-	af::CSceneLogic::GetSingletonPtr()->Init();
 
 	while (true)
 	{

@@ -101,6 +101,8 @@ namespace af
 		int InitEpoll(const char * Ip, int port, bool bBlock = false, int protoType = 1);
 		void SetMessageManger(CClientHandle * pClientHandle){ mClientHandle = pClientHandle; }
 		CNetSocket * GetNetSocket(const int fd);
+
+		int Send(const int nSocket, char * pBuff, int nLen);
 		int DelEvent(const int fd , bool bRecv = true);
 		int RunEpoll(const int timeout);
 	protected:
@@ -109,7 +111,6 @@ namespace af
 		int ModEvent(const int fd, const int oldevent, const int newevent);
 
 	private:
-		struct epoll_event *events_;
 		CNetSocketList mNetSocket;
 		int mEpollFd;
 		CListenSocket mListenSocket;

@@ -1,15 +1,17 @@
 #pragma once
 #include "cscenetype.h"
 
+#include <string.h>
+
 namespace af
 {
 	enum TmMessageID
 	{
 		emMessageID_None = 0,
 		emMessageID_Connect = 1,
-		emMessageID_DisConnectRequest = 2,
-		emMessageID_LoginSceneRequest = 3,
-		
+		emMessageID_DisConnect = 2,
+		emMessageID_LoginSceneRequest  = 3, //登陆请求
+		emMessageID_LoginSceneResponse = 4, //登陆回应
 
 	};
 
@@ -17,8 +19,10 @@ namespace af
 	{
 		emMessageAddrType_None = 0,
 		emMessageAddrType_PlayerClient = 1,  //玩家客户端
-		
+		emMessageAddrType_GameServer = 2,    //游戏服务器 
 	};
+
+
 
 	class CMessage
 	{
@@ -35,11 +39,52 @@ namespace af
 		int mSrcAddrType;  // 源地址
 	};
 
+	class CConnectMessage : public CMessage
+	{
+	public:
+		CConnectMessage()
+		{
+			mID = emMessageID_Connect;
+			mSize = sizeof(CConnectMessage);
+		}
+	};
+
+	class CDisConnectMessage : public CMessage
+	{
+	public:
+		CDisConnectMessage()
+		{
+			mID = emMessageID_DisConnect;
+			mSize = sizeof(CDisConnectMessage);
+		}
+	};
+
 	class CMessageLoginSceneRequest : public CMessage
 	{
 	public:
+		CMessageLoginSceneRequest()
+		{
+			mID = emMessageID_LoginSceneRequest;
+			mSize = sizeof(CMessageLoginSceneRequest);
+			memset(mAccount, 0, sizeof(mAccount));
+			memset(mPassWord, 0, sizeof(mPassWord));
+		}
+	public:
 		char mAccount[MAX_ACCOUNT_LEGNTH];
 		char mPassWord[MAX_PASSWORD_LEGNTH];
+	};
+
+	class CMessageLoginSceneResponse : public CMessage
+	{
+	public:
+		CMessageLoginSceneResponse()
+		{
+			mID = emMessageID_LoginSceneResponse;
+			mSize = sizeof(CMessageLoginSceneResponse);
+			mResult = 0;
+		}
+	public:
+		int mResult;
 	};
 
 };

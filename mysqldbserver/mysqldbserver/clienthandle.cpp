@@ -19,25 +19,37 @@ namespace af
 		mMyEpoll.RunEpoll(0);
 	}
 
-	void CClientHandle::OnRecvMessage(int pSocket, CMessage * pMsg)
+	void CClientHandle::SendClientMessage(int nScoket, CMessage * pMsg)
 	{
-		if (pSocket <= 0 || pMsg == NULL )
+		if (nScoket <= 0 || pMsg == NULL)
+		{
+			return;
+		}
+		pMsg->mSrcAddrType = emMessageAddrType_GameServer;
+
+		mMyEpoll.Send(nScoket, (char *)pMsg, pMsg->mSize);
+	}
+
+	void CClientHandle::OnRecvMessage(int nSocket, CMessage * pMsg)
+	{
+		if (nSocket <= 0 || pMsg == NULL )
 		{
 			return;
 		}
 
-		CSceneLogic::GetSingletonPtr()->ProcessMessage(pSocket, pMsg);
+		CSceneLogic::GetSingletonPtr()->ProcessMessage(nSocket, pMsg);
 	}
-
+	//检测有连接
 	void CClientHandle::OnConnectSocket(int nSocket)
 	{
-
+		CConnectMessage tMsg;
+		tMsg.mSrcAddrType = emMessageAddrType_PlayerClient;
+		CSceneLogic::GetSingletonPtr()->ProcessMessage(nSocket, &tMsg);
 	}
-
+	//检测断开
 	void CClientHandle::OnDisConnectSokcet(int nSocket)
 	{
-		CMessage tMsg;
-		tMsg.mID = emMessageID_DisConnectRequest;
+		CDisConnectMessage tMsg;
 		tMsg.mSrcAddrType = emMessageAddrType_PlayerClient;
 		CSceneLogic::GetSingletonPtr()->ProcessMessage(nSocket, &tMsg);
 	}

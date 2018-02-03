@@ -1,5 +1,13 @@
 #pragma once
 
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL    0
+#else  /* __cplusplus */
+#define NULL    ((void *)0)
+#endif  /* __cplusplus */
+#endif  /* NULL */
+
 template< typename T >
 class CMySingleton
 {

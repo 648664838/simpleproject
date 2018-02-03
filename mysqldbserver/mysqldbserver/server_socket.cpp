@@ -105,7 +105,13 @@ namespace af
 			return -1;
 		}
 
-		return read(mSocket, mBuff + mBuffLen, MAX_SOCKET_BUFF_SIZE * 2 + 1 - mBuffLen);
+		int nretnum = read(mSocket, mBuff + mBuffLen, MAX_SOCKET_BUFF_SIZE * 2 + 1 - mBuffLen);
+		if (nretnum > 0)
+		{
+			mBuffLen += nretnum;
+		}
+
+		return nretnum;
 	}
 
 	int CNetSocket::GetOneMessage(char * pBuff, int nLen)
@@ -129,6 +135,7 @@ namespace af
 				memmove(pBuff, mBuff, pMsg->mSize);
 				nMsgLen = pMsg->mSize;
 				mBuffLen -= pMsg->mSize;
+				memmove(mBuff, mBuff + pMsg->mSize, mBuffLen);
 			}
 		}
 		return nMsgLen;
@@ -138,7 +145,7 @@ namespace af
 	{
 		if (pBuff == NULL || nLen <= 0)
 		{
-			return 1;
+			return 0;
 		}
 
 		if (mSocket <= 0)
@@ -182,20 +189,11 @@ namespace af
 			return -1;
 		}
 
-		events_ = (struct epoll_event *)malloc(
-			sizeof(struct epoll_event) * MAX_SOCKET_NUM);
-
 		return 0;
 	}
 
 	CMyEpoll::~CMyEpoll()
 	{
-		if (events_)
-		{
-			delete events_;
-			events_ = NULL;
-		}
-
 	}
 
 	int CMyEpoll::InitEpoll(const char * Ip, int port, bool bBlock, int protoType)
@@ -203,18 +201,19 @@ namespace af
 		InitEpoll();
 		mListenSocket.InitSocket(Ip, port, protoType);
 		mListenSocket.Listen();
+		AddEvent(mListenSocket.GetSocket(), EPOLLIN | EPOLLERR | EPOLLHUP);
 		return 0;
 	}
 
 	int CMyEpoll::RunEpoll(const int timeout)
 	{
-		int retval, numevents = 0;
-		retval = epoll_wait(mEpollFd, events_, MAX_SOCKET_NUM, timeout);
+		epoll_event  tEvent[MAX_SOCKET_NUM];
+		int retval = epoll_wait(mEpollFd, tEvent, MAX_SOCKET_NUM, timeout);
 		if (retval > 0)
 		{
 			for (int i = 0; i < retval; ++i)
 			{
-				if (mListenSocket.GetSocket() > 0 && events_[i].data.fd == mListenSocket.GetSocket())
+				if (mListenSocket.GetSocket() > 0 && tEvent[i].data.fd == mListenSocket.GetSocket())
 				{ 
 					int nFd = 0;
 					while ((nFd = mListenSocket.Accpet())> 0)
@@ -228,12 +227,12 @@ namespace af
 						}
 					}
 				}
-				else if (events_[i].events & EPOLLIN)
+				else if (tEvent[i].events & EPOLLIN)
 				{
-					CNetSocket * pNetSocket = GetNetSocket(events_[i].data.fd);
+					CNetSocket * pNetSocket = GetNetSocket(tEvent[i].data.fd);
 					if (pNetSocket == NULL)
 					{
-						DelEvent(events_[i].data.fd);
+						DelEvent(tEvent[i].data.fd);
 						continue;
 					}
 					char pBuff[MAX_SOCKET_BUFF_SIZE];
@@ -254,7 +253,7 @@ namespace af
 					}
 					if (tBuffNum <= 0)
 					{
-						DelEvent(events_[i].data.fd);
+						DelEvent(tEvent[i].data.fd);
 						continue;
 					}
 				}
@@ -271,6 +270,23 @@ namespace af
 		}
 
 		return  &(it->second);
+	}
+
+	//TODO：暂时直接发消息
+	int CMyEpoll::Send(const int nSocket, char * pBuff, int nLen)
+	{
+		if (pBuff == NULL)
+		{
+			return 0;
+		}
+
+		CNetSocket * pNetSocket = GetNetSocket(nSocket);
+		if (pNetSocket == NULL)
+		{
+			return 0; 
+		}
+
+		return pNetSocket->WriteData(pBuff, nLen);
 	}
 
 	int CMyEpoll::AddEvent(const int fd, const int event)

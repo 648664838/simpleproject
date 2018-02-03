@@ -2,12 +2,13 @@
 #include "cmessage.h"
 #include "cplayer.h"
 #include <time.h>
+#include "cscenetype.h"
 
 namespace af
 {
 	void CSceneLogic::Init()
 	{
-		mClientHandle.Init("127.0.0.1",24100);
+		mClientHandle.Init("192.168.10.12",24100);
 		mDataBase.Initialize("./config/mysqlinfo.xml");
 	}
 	void CSceneLogic::Final()
@@ -27,6 +28,7 @@ namespace af
 		case emMessageAddrType_PlayerClient:
 		{
 			ProcessPlayerClientMessage(nSocketID, pMessage);
+			break;
 		}
 		default:
 			break;
@@ -53,10 +55,7 @@ namespace af
 				tInfo.mLastTime = time(NULL);
 				mConnectSocket.insert(make_pair(nSocketID,tInfo));
 			}
-			//else 
-			//{ // 已连接，但长时间不登陆，也踢掉
-			//	tpInfo->mLastTime = time(NULL);
-			//}
+
 			return;
 		}
 		case emMessageID_LoginSceneRequest:
@@ -81,6 +80,14 @@ namespace af
 		{
 			return;
 		}
+
+		CMessageLoginSceneResponse tResponse;
+		tResponse.mResult = SUCCESS;
+		mClientHandle.SendClientMessage(nSocket, &tResponse);
+
+		mConnectSocket.erase(tpInfo->mSocketID);
+
+		
 
 		//TODO：校验账号
 

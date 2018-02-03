@@ -15,6 +15,7 @@ namespace af
 		void Init();
 		void Init(const char * Ip,int nPort);
 		void Recv();
+		void SendClientMessage(int nScoket, CMessage * pMsg);
 		virtual void OnRecvMessage(int nSocket, CMessage * pMsg);
 		virtual void OnConnectSocket(int nSocket);
 		virtual void OnDisConnectSokcet(int nSocket);
