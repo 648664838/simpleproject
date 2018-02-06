@@ -4,17 +4,89 @@
 #include <time.h>
 #include "cscenetype.h"
 #include "error.h"
+#include "tinyxml.h"
 
 namespace af
 {
-	void CSceneLogic::Init()
+	int  CSceneLogic::Init()
 	{
-		mClientHandle.Init("192.168.10.12",24100);
+		bool nResult = LoadSceneConfig("./config/sceneconfig.xml");
+		if (!nResult)
+		{
+			return -1;
+		}
+
+		mClientHandle.Init(mSceneConfig.mIp,mSceneConfig.mPort);
 		mDataBase.Initialize("./config/mysqlinfo.xml");
+
+		nResult = InitSceneData();
+		if (!nResult)
+		{
+			return -2;
+		}
+
+		return SUCCESS;
 	}
+
 	void CSceneLogic::Final()
 	{
 
+	}
+
+	bool CSceneLogic::LoadSceneConfig(const char * pPath)
+	{
+		if (pPath == NULL)
+		{
+			return false;
+		}
+
+		TiXmlDocument tDoc;
+		if (!tDoc.LoadFile(pPath))
+		{
+			return false;
+		}
+
+		TiXmlElement *tpRoot = tDoc.FirstChildElement();
+		if (tpRoot == NULL)
+		{
+			return false;
+		}
+
+		TiXmlElement *tpSceneInfo = tpRoot->FirstChildElement("sceneinfo");
+		if (tpSceneInfo != NULL)
+		{
+			tpSceneInfo->Attribute("rolestartid", &mSceneConfig.mStartCharID);	
+			tpSceneInfo->Attribute("port", &mSceneConfig.mPort);
+			if (tpSceneInfo->Attribute("ip") != NULL)
+			{
+				strncpy(mSceneConfig.mIp, tpSceneInfo->Attribute("ip"), sizeof(mSceneConfig.mIp) - 1);
+			}
+		}
+
+		return true;
+	}
+
+	bool CSceneLogic::InitSceneData()
+	{
+		bool bExecute = mDataBase.ExecuteSql("select count(*) from tb_account ");
+		if (!bExecute || mDataBase.GetQueryResult().GetRowCount() <= 0)
+		{	
+			return false;
+		}
+
+		int nResult = mDataBase.GetQueryResult().NextRow();
+		if (!nResult)
+		{
+			return false;
+		}
+
+		CField * pRegisterField = mDataBase.GetQueryResult().GetCurRowFieldByIndex(0);
+		if (pRegisterField != NULL)
+		{
+			mRegisterPlayerNum = pRegisterField->GetInt32();
+		}
+
+		return true;
 	}
 
 	void CSceneLogic::Run()
@@ -59,14 +131,38 @@ namespace af
 
 			return;
 		}
+		case emMessageID_DisConnect:
+		{
+			OnMessageDisConnect(nSocketID);
+			return;
+		}
 		case emMessageID_LoginSceneRequest:
 		{
 			OnMessageLoginSceneRequest(nSocketID,pMessage);
 			return;
 		}
+		case emMessageID_CreateAccountRequest:
+		{
+			OnMessageCreateAccountRequest(nSocketID, pMessage);
+			return;
+		}
 		default:
 			break;
 		}	
+
+		CPlayerData * pPlayerData = GetScenePlayerData(nSocketID);
+		if (pPlayerData == NULL)
+		{
+			return;
+		}
+
+		//for (int i = 0;i < mClientHandle)
+	}
+
+
+	void CSceneLogic::OnMessageDisConnect(int nSocket)
+	{
+		mPlayerData.erase(nSocket);
 	}
 
 	void CSceneLogic::OnMessageLoginSceneRequest(int nSocket, CMessage * pMessage)
@@ -84,7 +180,7 @@ namespace af
 		}
 		CMessageLoginSceneRequest * pRequest = (CMessageLoginSceneRequest *)pMessage;
 		//校验账号
-		bool bExecute = mDataBase.ExecuteSql("select role_id from tb_account from where user_name ='%s' and password ='%s'", pRequest->mAccount, pRequest->mPassWord);
+		bool bExecute = mDataBase.ExecuteSql("select role_id from tb_account where user_name ='%s' and password ='%s'", pRequest->mAccount, pRequest->mPassWord);
 		if (!bExecute || mDataBase.GetQueryResult().GetRowCount() <= 0)
 		{
 			SendLoginSceneResponse(nSocket, ERROR_LOGIN_SCENE_ACOUNT_INVAILD);
@@ -108,7 +204,7 @@ namespace af
 			return;
 		}
 		CPlayerData tPlayerData;
-		nResult = LoadPlayerData(nSocket, nRoleID, tPlayerData);
+		nResult = LoadPlayerData(nRoleID, tPlayerData);
 		if (nResult != SUCCESS)
 		{
 			SendLoginSceneResponse(nSocket, nResult);
@@ -121,14 +217,14 @@ namespace af
 		SendLoginSceneResponse(nSocket, nResult);
 	}
 
-	int CSceneLogic::LoadPlayerData(int nSocket, int nRoleId, CPlayerData & rPlayerData)
+	int CSceneLogic::LoadPlayerData( int nRoleId, CPlayerData & rPlayerData)
 	{
 		if (nRoleId <= 0)
 		{
 			return ERROR_LOGIN_SCENE_ROLEID_ZERO;
 		}
 		//加载相关数据
-		bool bExecute = mDataBase.ExecuteSql("select role_money from tb_role from where role_id ='%d'", nRoleId);
+		bool bExecute = mDataBase.ExecuteSql("select role_money from tb_role where role_id ='%d'", nRoleId);
 		if (!bExecute || mDataBase.GetQueryResult().GetRowCount() <= 0)
 		{
 			return ERROR_LOGIN_SCENE_ROLEDATA_NULL;
@@ -153,7 +249,6 @@ namespace af
 			return ERROR_LOGIN_SCENE_ROLEDATA_FECTH;
 		}
 
-		rPlayerData.mSocket = nSocket;
 		rPlayerData.mCharID = nRoleId;
 		rPlayerData.mMoney = pRoleIdField[0].GetInt32();
 		return SUCCESS;
@@ -162,6 +257,46 @@ namespace af
 	void CSceneLogic::SendLoginSceneResponse(int nSocket, int nResult)
 	{
 		CMessageLoginSceneResponse tResponse;
+		tResponse.mResult = nResult;
+		mClientHandle.SendClientMessage(nSocket, &tResponse);
+	}
+
+	void CSceneLogic::OnMessageCreateAccountRequest(int nSocket, CMessage * pMessage)
+	{
+		if (nSocket < 0 || pMessage == NULL)
+		{
+			return;
+		}
+		CMessageCreateAccountRequest * pRequest = (CMessageCreateAccountRequest *)pMessage;
+		bool bExecute = mDataBase.ExecuteSql("select role_id from tb_account where user_name ='%s'", pRequest->mAccount);
+		if (bExecute && mDataBase.GetQueryResult().GetRowCount() > 0)
+		{
+			SendCreateAccountResponse(nSocket, ERROR_CREATE_ACCOUNT_EXIST);
+			return;
+		}
+
+		//创建
+		int nRoleID = mSceneConfig.mStartCharID + mRegisterPlayerNum + 1;
+		bExecute = mDataBase.ExecuteSql("insert into tb_account (role_id,user_name,password,create_time)  value(%d,%s,%s,%d) ", nRoleID, pRequest->mAccount, pRequest->mPassWord, time(NULL));
+		if (!bExecute)
+		{
+			SendCreateAccountResponse(nSocket, ERROR_CREATE_ACCOUNT_EXIST);
+			return;
+		}
+		//创建玩家数据
+		bExecute = mDataBase.ExecuteSql("insert into tb_role(role_id) value(%d) ", nRoleID);
+		if (!bExecute)
+		{
+			//LOG
+			SendCreateAccountResponse(nSocket, ERROR_CREATE_ACCOUNT_ROLE);
+			return;
+		}
+		++mRegisterPlayerNum;
+		SendCreateAccountResponse(nSocket, SUCCESS);
+	}
+	void CSceneLogic::SendCreateAccountResponse(int nSocket, int nResult)
+	{
+		CMessageCreateAccountResponse tResponse;
 		tResponse.mResult = nResult;
 		mClientHandle.SendClientMessage(nSocket, &tResponse);
 	}

@@ -92,6 +92,12 @@ int main(int argc, const char * argv[])
 		init_daemon();
 	}
 
+	int nResult = af::CSceneLogic::GetSingletonPtr()->Init();
+	if (nResult != SUCCESS)
+	{
+		//LOG
+		return 0;
+	}
 
 	while (true)
 	{

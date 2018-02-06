@@ -33,3 +33,11 @@ enum emLoginSceneError
 	ERROR_LOGIN_SCENE_ROLEDATA_INVALLD = -305, //加载的Role数据不对出错
 	ERROR_LOGIN_SCENE_ROLEDATA_FECTH   = -306, //加载的Role数据出错
 };
+
+enum emCreateAccountError
+{
+	ERROR_CREATE_ACCOUNT_EXIST		 = -400, //账号已存在
+	ERROR_CREATE_ACCOUNT_ACCOUNT	 = -401, //创建账号出错
+	ERROR_CREATE_ACCOUNT_ROLE		 = -402, //创建玩家数据出错
+
+};

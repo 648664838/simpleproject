@@ -106,7 +106,7 @@ bool CDataBase::ExecuteSql(const char* pSql, ...)
 	va_end(tArgs);
 
 	string strSql(tSqlCommand);
-	escape_string(strSql);
+//	escape_string(strSql);
 
 	int nFlag = mysql_real_query(mMySql, strSql.c_str(), (unsigned int)strSql.length());
 	if (nFlag)
@@ -118,9 +118,9 @@ bool CDataBase::ExecuteSql(const char* pSql, ...)
 	MYSQL_RES * pSqlResult = mysql_store_result(mMySql);
 	if (pSqlResult == NULL)
 	{
-		cout << "Query : pSqlResult == NULL" << endl;
-		return false;
+		return true;
 	}
+
 	uint64 nRowCount = mysql_affected_rows(mMySql);
 	uint32 nFieldCount = mysql_field_count(mMySql);
 	mQueryResult.Init(pSqlResult, nRowCount, nFieldCount);

@@ -7,12 +7,14 @@ namespace af
 {
 	enum TmMessageID
 	{
-		emMessageID_None = 0,
-		emMessageID_Connect = 1,
-		emMessageID_DisConnect = 2,
+		emMessageID_None			   = 0,
+		emMessageID_Connect			   = 1,
+		emMessageID_DisConnect		   = 2,
 		emMessageID_LoginSceneRequest  = 3, //登陆请求
 		emMessageID_LoginSceneResponse = 4, //登陆回应
 		emMessageID_KickPlayerNotify   = 5,	//踢掉玩家
+		emMessageID_CreateAccountRequest  = 6, //创建账号请求
+		emMessageID_CreateAccountResponse = 7, //创建账号回应
 	};
 
 	enum TmMessageAddrType
@@ -99,4 +101,31 @@ namespace af
 		int mResult;
 	};
 
+	class CMessageCreateAccountRequest : public CMessage
+	{
+	public:
+		CMessageCreateAccountRequest()
+		{
+			mID = emMessageID_CreateAccountRequest;
+			mSize = sizeof(CMessageCreateAccountRequest);
+			memset(mAccount, 0, sizeof(mAccount));
+			memset(mPassWord, 0, sizeof(mPassWord));
+		}
+	public:
+		char mAccount[MAX_ACCOUNT_LEGNTH];
+		char mPassWord[MAX_PASSWORD_LEGNTH];
+	};
+
+	class CMessageCreateAccountResponse : public CMessage
+	{
+	public:
+		CMessageCreateAccountResponse()
+		{
+			mID = emMessageID_CreateAccountResponse;
+			mSize = sizeof(CMessageCreateAccountResponse);
+			mResult = 0;
+		}
+	public:
+		int mResult;
+	};
 };
