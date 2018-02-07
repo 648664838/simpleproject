@@ -75,6 +75,7 @@ namespace af
 		CSocketInfo * GetSceneVerifyData(int nSocket);
 		void OnMessageLoginSceneRequest(int nSocket,CMessage * pMessage);
 		void SendLoginSceneResponse(int nSocket, int nResult);
+		
 
 		void OnMessageCreateAccountRequest(int nSocket, CMessage * pMessage);
 		void SendCreateAccountResponse(int nSocket, int nResult);

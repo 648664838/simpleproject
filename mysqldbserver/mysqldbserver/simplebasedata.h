@@ -5,6 +5,7 @@ using namespace std;
 #include <string>
 #include <stdio.h>
 #include <algorithm>
+
 class CField
 {
 public:

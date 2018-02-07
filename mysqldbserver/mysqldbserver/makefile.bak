@@ -1,4 +1,4 @@
-COMMONPATH	= ../../mxw2Server/common
+COMMONPATH	= common
 CC		= gcc
 CXX		= g++
 CXXFLAGS 	= -g
@@ -38,7 +38,7 @@ first: all
 ./debug/clienthandle.o  :  ./clienthandle.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
-./debug/./debug/scenelogic.o  :  ./scenelogic.cpp
+./debug/scenelogic.o  :  ./scenelogic.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 all : $(TARGET) 

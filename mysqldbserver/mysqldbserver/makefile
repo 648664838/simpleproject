@@ -1,8 +1,8 @@
-COMMONPATH	= ../../mxw2Server/common
+COMMONPATH	= common
 CC		= gcc
 CXX		= g++
 CXXFLAGS 	= -g
-INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I$(COMMONPATH)/include/
+INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I $(COMMONPATH)/include/
 LIBS     	= -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
 LINK     	= g++	
 ####### Files
