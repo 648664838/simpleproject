@@ -26,14 +26,14 @@ using namespace std;
 
 void af::InitLogCategory()
 {
-	const int nLogNum = 5;
+	const int nLogNum = 4;
 	string strLogName[nLogNum][2] =
 	{
-		{ "", "./Log/default.txt" },
-		{ "default", "./Log/default.txt" },
-		{ "login", "./Log/login.txt" },
-		{ "socket", "./Log/socket.txt" },
-		{ "logic", "./Log/logic.txt" }
+		//{ "", "./logcpp/default.txt" },
+		{ "default", "./logcpp/default.txt" },
+		{ "login", "./logcpp/login.txt" },
+		{ "socket", "./logcpp/socket.txt" },
+		{ "logic", "./logcpp/logic.txt" }
 	};
 
 	log4cpp::PatternLayout* pLayout = new log4cpp::PatternLayout();
@@ -64,20 +64,42 @@ void af::ShutDownCategory()
 
 void af::LogInfo(const char* vLogName, const char* vFmt, ...)
 {
-	log4cpp::Category::getInstance(vLogName).infoStream() << VaListBuff.GetBuffByFormat(&vFmt);
+
+	char mBuff[MAX_LOG_BUFF_LENGTH];
+	va_list ap;
+	va_start(ap, vFmt);
+	vsprintf(mBuff, vFmt, ap);
+	va_end(ap);
+
+	log4cpp::Category::getInstance(vLogName).infoStream() << mBuff;
 }
 
 void af::LogError(const char* vLogName, const char* vFmt, ...)
 {
-	log4cpp::Category::getInstance(vLogName).errorStream() << VaListBuff.GetBuffByFormat(&vFmt);
+	char mBuff[MAX_LOG_BUFF_LENGTH];
+	va_list ap;
+	va_start(ap, vFmt);
+	vsprintf(mBuff, vFmt, ap);
+	va_end(ap);
+	log4cpp::Category::getInstance(vLogName).errorStream() << mBuff;
 }
 
 void af::LogDebug(const char* vLogName, const char* vFmt, ...)
 {
-	log4cpp::Category::getInstance(vLogName).debugStream() << VaListBuff.GetBuffByFormat(&vFmt);
+	char mBuff[MAX_LOG_BUFF_LENGTH];
+	va_list ap;
+	va_start(ap, vFmt);
+	vsprintf(mBuff, vFmt, ap);
+	va_end(ap);
+	log4cpp::Category::getInstance(vLogName).debugStream() << mBuff;
 }
 
 void af::LogWarn(const char* vLogName, const char* vFmt, ...)
 {
-	log4cpp::Category::getInstance(vLogName).warnStream() << VaListBuff.GetBuffByFormat(&vFmt);
+	char mBuff[MAX_LOG_BUFF_LENGTH];
+	va_list ap;
+	va_start(ap, vFmt);
+	vsprintf(mBuff, vFmt, ap);
+	va_end(ap);
+	log4cpp::Category::getInstance(vLogName).warnStream() << mBuff;
 }

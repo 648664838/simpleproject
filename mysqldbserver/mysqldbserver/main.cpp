@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "clog.h"
 using namespace std;
 
 // 设置描述符不能被继承
@@ -99,7 +100,9 @@ int main(int argc, const char * argv[])
 		return 0;
 	}
 
-	
+	af::InitLogCategory();
+
+	af::LogInfo("default","Server Success ! %d",1);
 
 	while (true)
 	{

@@ -19,28 +19,28 @@ namespace af
 	void LogDebug(const char* vLogName, const char* vFmt, ...);
 	void LogWarn(const char* vLogName, const char* vFmt, ...);
 
-	class CVaListBuff
+	/*class CVaListBuff
 	{
 	public:
-		CVaListBuff()
-		{
-			memset(mBuff, 0, sizeof(mBuff));
-		}
-		char * GetBuffByFormat(const char** vFmt,...)
-		{
-			memset(mBuff, 0, sizeof(mBuff));
-			if (vFmt && *vFmt)
-			{
-				va_list ap;
-				va_start(ap, *vFmt);
-				vsprintf(mBuff, *vFmt, ap);
-				va_end(ap);
-			}
-			return mBuff;
-		}
+	CVaListBuff()
+	{
+	memset(mBuff, 0, sizeof(mBuff));
+	}
+	char * GetBuffByFormat(const char** vFmt,...)
+	{
+	memset(mBuff, 0, sizeof(mBuff));
+	if (vFmt && *vFmt)
+	{
+	va_list ap;
+	va_start(ap, *vFmt);
+	vsprintf(mBuff, *vFmt, ap);
+	va_end(ap);
+	}
+	return mBuff;
+	}
 	public:
-		char mBuff[MAX_LOG_BUFF_LENGTH];
+	char mBuff[MAX_LOG_BUFF_LENGTH];
 	};
 
-	static CVaListBuff VaListBuff;
+	static CVaListBuff VaListBuff;*/
 };
