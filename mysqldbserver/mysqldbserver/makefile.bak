@@ -2,14 +2,14 @@ COMMONPATH	= common
 CC		= gcc
 CXX		= g++
 CXXFLAGS 	= -g
-INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I$(COMMONPATH)/include/
-LIBS     	= -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
+INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I $(COMMONPATH)/include/ -I./$(COMMONPATH)/log4cpp/include
+LIBS     	= -L./$(COMMONPATH)/log4cpp/lib -llog4cpp -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
 LINK     	= g++	
 ####### Files
 
 OBJECTS = ./debug/simplebasedata.o ./debug/main.o \
         ./debug/tinystr.o ./debug/tinyxml.o ./debug/tinyxmlerror.o ./debug/tinyxmlparser.o \
-	./debug/server_socket.o ./debug/clienthandle.o ./debug/scenelogic.o
+	./debug/server_socket.o ./debug/clienthandle.o ./debug/scenelogic.o ./debug/clog.o 
 
 TARGET = ./mysimpledb
 
@@ -39,6 +39,9 @@ first: all
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 ./debug/scenelogic.o  :  ./scenelogic.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+./debug/clog.o    :  ./clog.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 all : $(TARGET) 
