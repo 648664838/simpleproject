@@ -14,4 +14,5 @@ public:
 public:
 	int mCharID;
 	int mMoney;
+	int mLastPingTime;
 };

@@ -5,6 +5,7 @@
 #include "cscenetype.h"
 #include "error.h"
 #include "tinyxml.h"
+#include "clog.h"
 
 namespace af
 {
@@ -13,6 +14,7 @@ namespace af
 		bool nResult = LoadSceneConfig("./config/sceneconfig.xml");
 		if (!nResult)
 		{
+			LogError("default", "Server : LoadSceneConfig Error");
 			return -1;
 		}
 
@@ -22,8 +24,11 @@ namespace af
 		nResult = InitSceneData();
 		if (!nResult)
 		{
+			LogError("default", "Server : InitSceneData Error");
 			return -2;
 		}
+
+		mLastTickCount = GetTickTime();
 
 		return SUCCESS;
 	}
@@ -91,6 +96,8 @@ namespace af
 
 	void CSceneLogic::Run()
 	{
+		CheckTimer();
+
 		mClientHandle.Recv();
 	}
 
@@ -106,6 +113,64 @@ namespace af
 		default:
 			break;
 		}
+
+	}
+
+
+	void CSceneLogic::CheckTimer()
+	{
+		uint64 tNowCount = GetTickTime();
+		unsigned int tInterval = tNowCount - mLastTickCount;
+		//每隔200毫秒, 让所有定时器都自检一次.
+		if (tInterval < 200)
+		{
+			return;
+		}
+		int nTimeNow = tNowCount / 1000;
+		for (auto it = mConnectSocket.begin(); it != mConnectSocket.end(); )
+		{
+			CSocketInfo & rInfo = it->second;
+			if (rInfo.mLastTime + MAX_CONNECT_WAIT_TIME < nTimeNow)
+			{//断开长时间没登陆的连接
+				it = mConnectSocket.erase(it);
+				continue;
+			}
+			it++;
+		}
+
+		for (auto it = mPlayerData.begin(); it != mPlayerData.end();)
+		{
+			CPlayerData & rData = it->second;
+			if (rData.mLastPingTime + MAX_LOGIN_PING_TIME < nTimeNow)
+			{//断开长时间没Ping的连接
+				KickPlayer(it->first, 0);
+				it = mPlayerData.erase(it);
+				continue;
+			}
+			it++;
+		}
+
+	}
+
+	void CSceneLogic::KickPlayer(int nSocket, int nReason)
+	{
+		mClientHandle.DisConnectSocket(nSocket,nReason);
+	}
+
+	uint64 CSceneLogic::GetTickTime()
+	{
+#ifdef LINUX
+		timespec tv;
+		// This is not affected by system time changes.
+		if (clock_gettime(CLOCK_MONOTONIC, &tv) != 0)
+		{
+			printf("clock_gettime return error!");
+			exit(-1);
+		}
+		return ((int64)tv.tv_sec) * 1000 + (((int64)tv.tv_nsec/*+500*/) / 1000000);
+#else
+		return 0;
+#endif
 
 	}
 
@@ -287,7 +352,7 @@ namespace af
 		bExecute = mDataBase.ExecuteSql("insert into tb_role(role_id) value(%d) ", nRoleID);
 		if (!bExecute)
 		{
-			//LOG
+			LogError("logic", "create tb_role error nRoleID %d", nRoleID);
 			SendCreateAccountResponse(nSocket, ERROR_CREATE_ACCOUNT_ROLE);
 			return;
 		}

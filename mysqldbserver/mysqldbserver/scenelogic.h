@@ -5,6 +5,7 @@
 #include "CSingleton.h"
 #include "simplebasedata.h"
 #include <map>
+#include "base.h"
 
 using namespace std;
 
@@ -67,6 +68,8 @@ namespace af
 		void Run();
 
 
+		void CheckTimer();
+		uint64 GetTickTime();
 
 		void ProcessMessage(int nSocketID,CMessage * pMessage);
 
@@ -84,6 +87,8 @@ namespace af
 		void ProcessPlayerClientMessage(int nSocket, CMessage * pMessage);
 
 		void OnMessageDisConnect(int nSocket);
+
+		void KickPlayer(int nSocket, int nReason);
 	protected:
 		bool LoadSceneConfig(const char * pPath); //加载服务器数据
 		bool InitSceneData();
@@ -97,6 +102,8 @@ namespace af
 		CSceneConfig mSceneConfig;  //游戏一些全局数据
 		int		  mRegisterPlayerNum; //已注册的玩家
 		CDataBase mDataBase;   //数据库
+
+		uint64    mLastTickCount;
 	};
 }
 

@@ -19,7 +19,7 @@ namespace af
 		virtual void OnRecvMessage(int nSocket, CMessage * pMsg);
 		virtual void OnConnectSocket(int nSocket);
 		virtual void OnDisConnectSokcet(int nSocket);
-		virtual void DisConnectSocket(int nSocket);
+		virtual void DisConnectSocket(int nSocket,int nReason);
 	private:
 		CMyEpoll  mMyEpoll;
 	};

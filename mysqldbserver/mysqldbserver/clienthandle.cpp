@@ -54,8 +54,12 @@ namespace af
 		CSceneLogic::GetSingletonPtr()->ProcessMessage(nSocket, &tMsg);
 	}
 	//Ö÷¶¯¶Ï¿ª
-	void CClientHandle::DisConnectSocket(int nSocket)
+	void CClientHandle::DisConnectSocket(int nSocket, int nReason)
 	{
+		CKickPlayerNotifyMessage tMsg;
+		tMsg.mReason = nReason;
+		mMyEpoll.Send(nSocket, (char *)&tMsg, tMsg.mSize);
+
 		mMyEpoll.DelEvent(nSocket, false);
 	}
 }

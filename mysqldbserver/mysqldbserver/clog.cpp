@@ -70,7 +70,6 @@ void af::LogInfo(const char* vLogName, const char* vFmt, ...)
 	va_start(ap, vFmt);
 	vsprintf(mBuff, vFmt, ap);
 	va_end(ap);
-
 	log4cpp::Category::getInstance(vLogName).infoStream() << mBuff;
 }
 
