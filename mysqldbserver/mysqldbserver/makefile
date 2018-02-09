@@ -3,7 +3,7 @@ CC		= gcc
 CXX		= g++
 CXXFLAGS 	= -g
 INCPATH		= -I./inc -I./$(COMMONPATH)/tiny -I $(COMMONPATH)/mysql/inc/ -I $(COMMONPATH)/include/ -I./$(COMMONPATH)/log4cpp/include
-LIBS     	= -lpthread -L./$(COMMONPATH)/log4cpp/lib -llog4cpp -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
+LIBS     	= -lrt -lpthread -L./$(COMMONPATH)/log4cpp/lib -llog4cpp -L$(COMMONPATH)/mysql/lib/ -lmysqlclient  -lz 
 LINK     	= g++	
 ####### Files
 

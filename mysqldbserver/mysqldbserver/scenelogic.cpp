@@ -6,6 +6,7 @@
 #include "error.h"
 #include "tinyxml.h"
 #include "clog.h"
+#include <time.h>
 
 namespace af
 {
@@ -127,29 +128,32 @@ namespace af
 			return;
 		}
 		int nTimeNow = tNowCount / 1000;
-		for (auto it = mConnectSocket.begin(); it != mConnectSocket.end(); )
-		{
-			CSocketInfo & rInfo = it->second;
-			if (rInfo.mLastTime + MAX_CONNECT_WAIT_TIME < nTimeNow)
-			{//断开长时间没登陆的连接
-				it = mConnectSocket.erase(it);
-				continue;
-			}
-			it++;
-		}
+		//map<int, CSocketInfo>::iterator iterConnect = mConnectSocket.begin();
+		//for (; iterConnect != mConnectSocket.end();)
+		//{
+		//	CSocketInfo & rInfo = iterConnect->second;
+		//	if (rInfo.mLastTime + MAX_CONNECT_WAIT_TIME < nTimeNow)
+		//	{//断开长时间没登陆的连接
+		//		KickPlayer(iterConnect->first, 0);
+		//		mConnectSocket.erase(iterConnect++);
+		//		continue;
+		//	}
+		//	iterConnect++;
+		//}
+		//PlayerDataMap::iterator iterPlayerData = mPlayerData.begin();
+		//for (; iterPlayerData != mPlayerData.end();)
+		//{
+		//	CPlayerData & rData = iterPlayerData->second;
+		//	if (rData.mLastPingTime + MAX_LOGIN_PING_TIME < nTimeNow)
+		//	{//断开长时间没Ping的连接
+		//		KickPlayer(iterPlayerData->first, 0);
+		//		mPlayerData.erase(iterPlayerData++);
+		//		continue;
+		//	}
+		//	iterPlayerData++;
+		//}
 
-		for (auto it = mPlayerData.begin(); it != mPlayerData.end();)
-		{
-			CPlayerData & rData = it->second;
-			if (rData.mLastPingTime + MAX_LOGIN_PING_TIME < nTimeNow)
-			{//断开长时间没Ping的连接
-				KickPlayer(it->first, 0);
-				it = mPlayerData.erase(it);
-				continue;
-			}
-			it++;
-		}
-
+		mLastTickCount = tNowCount;
 	}
 
 	void CSceneLogic::KickPlayer(int nSocket, int nReason)
@@ -159,19 +163,14 @@ namespace af
 
 	uint64 CSceneLogic::GetTickTime()
 	{
-#ifdef LINUX
 		timespec tv;
 		// This is not affected by system time changes.
-		if (clock_gettime(CLOCK_MONOTONIC, &tv) != 0)
+		if (clock_gettime(CLOCK_REALTIME, &tv) != 0)
 		{
 			printf("clock_gettime return error!");
 			exit(-1);
 		}
 		return ((int64)tv.tv_sec) * 1000 + (((int64)tv.tv_nsec/*+500*/) / 1000000);
-#else
-		return 0;
-#endif
-
 	}
 
 	void CSceneLogic::ProcessPlayerClientMessage(int nSocketID, CMessage * pMessage)
