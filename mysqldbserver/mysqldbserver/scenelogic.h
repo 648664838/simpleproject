@@ -86,6 +86,7 @@ namespace af
 		int  LoadPlayerData(int nRoleId, CPlayerData & rPkayerData);
 		void ProcessPlayerClientMessage(int nSocket, CMessage * pMessage);
 
+		void SendPlayerClientDataNotify(CPlayerData & rPlayerData);
 		void OnMessageDisConnect(int nSocket);
 
 		void KickPlayer(int nSocket, int nReason);

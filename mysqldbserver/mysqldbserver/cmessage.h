@@ -15,6 +15,7 @@ namespace af
 		emMessageID_KickPlayerNotify   = 5,	//踢掉玩家
 		emMessageID_CreateAccountRequest  = 6, //创建账号请求
 		emMessageID_CreateAccountResponse = 7, //创建账号回应
+		emMessageID_S2C_PlayerClientDataNotify = 8,//服务器->客户端 通知玩家数据
 	};
 
 	enum TmMessageAddrType
@@ -127,5 +128,17 @@ namespace af
 		}
 	public:
 		int mResult;
+	};
+
+	class CMessagePlayerClientDataNotify : public CMessage
+	{
+	public:
+		CMessagePlayerClientDataNotify()
+		{
+			mID = emMessageID_S2C_PlayerClientDataNotify;
+			mSize = sizeof(CMessagePlayerClientDataNotify);
+		}
+	public:
+		int mMoney;
 	};
 };

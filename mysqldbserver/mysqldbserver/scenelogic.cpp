@@ -276,9 +276,12 @@ namespace af
 		}
 	
 		mConnectSocket.erase(tpInfo->mSocketID);
+		tPlayerData.mSocket = nSocket;
 		mPlayerData.insert(make_pair(nSocket, tPlayerData));
-
+		
 		SendLoginSceneResponse(nSocket, nResult);
+
+		SendPlayerClientDataNotify(tPlayerData);
 	}
 
 	int CSceneLogic::LoadPlayerData( int nRoleId, CPlayerData & rPlayerData)
@@ -323,6 +326,13 @@ namespace af
 		CMessageLoginSceneResponse tResponse;
 		tResponse.mResult = nResult;
 		mClientHandle.SendClientMessage(nSocket, &tResponse);
+	}
+
+	void CSceneLogic::SendPlayerClientDataNotify(CPlayerData & rPlayerData)
+	{
+		CMessagePlayerClientDataNotify tNotify;
+		tNotify.mMoney = rPlayerData.mMoney;
+		mClientHandle.SendClientMessage(rPlayerData.mSocket, &tNotify);
 	}
 
 	void CSceneLogic::OnMessageCreateAccountRequest(int nSocket, CMessage * pMessage)
