@@ -23,11 +23,7 @@ public:
 public:
 	void ProcessMessage(CMessage * pMsg);
 	void SendTimerSignal();
-	void CreateAccount(char * acount, char * password);
-	void LoginServer(char * acount, char * password);
-	void OnLoginServerResponse(CMessage * pMsg);
-	void OnCreateRoleResponse(CMessage * pMsg);
-	void OnPlayerClientDataNotify(CMessage * pMsg);
+
 private:
 	int mModuleNum;
 	CLogicModule * mLogicModule[MAX_MODULE_NUM];

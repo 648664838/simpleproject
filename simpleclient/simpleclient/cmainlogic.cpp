@@ -1,7 +1,8 @@
 #include "cmainlogic.h"
 #include "cscenetype.h"
 #include "CSocketModule.h"
-
+#include "cdata.h"
+#include "cloginmodule.h"
 
 //³ÌÐò¿ªÊ¼
 int CMainLogic::MyMain()
@@ -30,6 +31,8 @@ void CMainLogic::RegistModule()
 	//mLogicModule[mModuleNum++] = CLoginServerModule::GetSingletonPtr();
 
 	mLogicModule[mModuleNum++] = CSocketModule::GetSingletonPtr();
+
+	mLogicModule[mModuleNum++] = CLoginModule::GetSingletonPtr();
 }
 void CMainLogic::InitModule()
 {
@@ -61,40 +64,6 @@ void CMainLogic::SendTimerSignal()
 	}
 }
 
-void CMainLogic::LoginServer(char * acount, char * password)
-{
-	if (acount == NULL || password == NULL)
-	{
-		return;
-	}
-	if (!CSocketModule::GetSingletonPtr()->IsConnectServer())
-	{
-		int nRet = CSocketModule::GetSingletonPtr()->ClientConnectServer();
-		if (nRet != SUCCESS)
-		{
-			return;
-		}
-	}
-
-	CMessageLoginSceneRequest tRequest;
-	strncpy(tRequest.mAccount, acount, sizeof(tRequest.mAccount) - 1);
-	strncpy(tRequest.mPassWord, password, sizeof(tRequest.mPassWord) - 1);
-	CSocketModule::GetSingletonPtr()->SendServerMessage(&tRequest);
-}
-
-void CMainLogic::CreateAccount(char * acount, char * password)
-{
-	if (acount == NULL || password == NULL)
-	{
-		return;
-	}
-
-	CMessageCreateAccountRequest tRequest;
-	strncpy(tRequest.mAccount, acount, sizeof(tRequest.mAccount) - 1);
-	strncpy(tRequest.mPassWord, password, sizeof(tRequest.mPassWord) - 1);
-	CSocketModule::GetSingletonPtr()->SendServerMessage(&tRequest);
-}
-
 void CMainLogic::ProcessMessage(CMessage * pMsg)
 {
 	if (pMsg == NULL)
@@ -107,62 +76,10 @@ void CMainLogic::ProcessMessage(CMessage * pMsg)
 		return;
 	}
 
-	if (pMsg->mID == emMessageID_LoginSceneResponse)
-	{
-		OnLoginServerResponse(pMsg);
-		return;
-	}
-
-	if (pMsg->mID == emMessageID_CreateAccountResponse)
-	{
-		OnCreateRoleResponse(pMsg);
-		return;
-	}
-
-	if (pMsg->mID == emMessageID_S2C_PlayerClientDataNotify)
-	{
-		OnPlayerClientDataNotify(pMsg);
-		return;
-	}
-
 	for (int i = 0; i < mModuleNum; ++i)
 	{
 		mLogicModule[i]->OnRecvServerMessage(CSocketModule::GetSingletonPtr()->GetSocketFb(), pMsg);
 	}
-}
-
-void CMainLogic::OnPlayerClientDataNotify(CMessage * pMsg)
-{
-	if (pMsg == NULL)
-	{
-		return;
-	}
-
-	CMessagePlayerClientDataNotify * pNotify = (CMessagePlayerClientDataNotify *)pMsg;
-
-	int mMoney = pNotify->mMoney;
-}
-
-void CMainLogic::OnLoginServerResponse(CMessage * pMsg)
-{
-	if (pMsg == NULL)
-	{
-		return;
-	}
-
-	CMessageLoginSceneResponse * pResponse = (CMessageLoginSceneResponse *)pMsg;
-	int nResult = pResponse->mResult;
-}
-
-void CMainLogic::OnCreateRoleResponse(CMessage * pMsg)
-{
-	if (pMsg == NULL)
-	{
-		return;
-	}
-
-	CMessageCreateAccountResponse * pResponse = (CMessageCreateAccountResponse *)pMsg;
-	int nResult = pResponse->mResult;
 }
 
 int CMainLogic::OnTimer(unsigned int nIDEvent)
