@@ -1,6 +1,6 @@
 #include "scenelogic.h"
 #include "cmessage.h"
-#include "cplayer.h"
+
 #include <time.h>
 #include "cscenetype.h"
 #include "error.h"
@@ -30,6 +30,9 @@ namespace af
 		}
 
 		mLastTickCount = GetTickTime();
+
+		mLogicModuleNum = 0;
+		memset(mLogicModule,0,sizeof(mLogicModule));
 
 		return SUCCESS;
 	}
@@ -220,7 +223,10 @@ namespace af
 			return;
 		}
 
-		//for (int i = 0;i < mClientHandle)
+		for (int i = 0; i < mLogicModuleNum; ++i)
+		{
+			mLogicModule[i]->OnRecvMessage(pPlayerData, pMessage);
+		}
 	}
 
 

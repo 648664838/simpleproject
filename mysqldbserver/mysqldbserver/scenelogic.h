@@ -1,7 +1,7 @@
 #pragma once
 
 #include "clienthandle.h"
-#include "cplayer.h"
+#include "clogicmodule.h"
 #include "CSingleton.h"
 #include "simplebasedata.h"
 #include <map>
@@ -103,6 +103,9 @@ namespace af
 		CSceneConfig mSceneConfig;  //游戏一些全局数据
 		int		  mRegisterPlayerNum; //已注册的玩家
 		CDataBase mDataBase;   //数据库
+
+		CLogicModule * mLogicModule[20];
+		int		  mLogicModuleNum;
 
 		uint64    mLastTickCount;
 	};
